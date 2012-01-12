@@ -1,0 +1,17 @@
+#!/bin/sh
+# add dnsmasq caching server to /etc/resolv.conf
+# file: /etc/NetworkManager/dispatcher.d/91-dnsmasq
+
+set -e
+
+IFACE=$1
+MODE=$2
+
+if [[ "$IFACE" = lo ]]; then exit 0; fi
+
+if [[ "$MODE" == up ]]
+then
+  sed -i -e '/^search/a\nameserver 127.0.0.1' /etc/resolv.conf
+fi
+
+exit $?
