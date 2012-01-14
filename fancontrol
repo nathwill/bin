@@ -1,0 +1,34 @@
+#!/bin/sh
+# /usr/local/bin/fancontrol
+# a script to control qnap fanspeed
+#
+
+TEMPERATURE=$(/usr/sbin/hddtemp -n /dev/sda)
+QCONTROL=/usr/sbin/qcontrol
+
+$QCONTROL -d 2>/dev/null &
+sleep 5 
+
+if [ $TEMPERATURE -le 38 ]; then
+   echo "Temperature: $TEMPERATURE | Fan: stop"
+   $QCONTROL fanspeed stop
+elif [ $TEMPERATURE -gt 38 ] && [ $TEMPERATURE -le 48 ]; then
+   echo "Temperature: $TEMPERATURE | Fan: medium"
+   $QCONTROL fanspeed medium
+elif [ $TEMPERATURE -gt 48 ] && [ $TEMPERATURE -le 55 ]; then
+   echo "Temperature: $TEMPERATURE | Fan: high"
+   $QCONTROL fanspeed high
+else
+   $QCONTROL buzzer long
+   echo "WARN! Abnormal conditions detected."
+   echo "Temperature: $TEMPERATURE | Fan: full"
+   $QCONTROL fanspeed full
+fi
+
+sleep 5
+/usr/bin/killall qcontrol
+
+sleep 2
+rm /var/run/qcontrol.sock
+
+exit 0
